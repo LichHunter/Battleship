@@ -4,3 +4,4 @@ content:
   - Throw a checked exception
   - Convert to bytes
   - Reverse input text
+  - Count words
