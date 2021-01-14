@@ -69,6 +69,13 @@ public class Checker {
 		}
 	}
 
+	public boolean checkCoordinates(String coordinate, String[][] field) {
+		int i = Helper.letterToNumber(coordinate.charAt(0));
+		int j = Integer.parseInt(coordinate.substring(1));
+
+		return i < field.length && j < field[0].length;
+	}
+
 	/**
 	 * Method will check whether coordinates are correct
 	 *

@@ -28,19 +28,63 @@ public class Game {
 
 		int i = 0;
 		while (i != 5) {
-			System.out.format("Enter the coordinates of the %s (%d cells): \n", ships[i].getName(),
+			System.out.format("\nEnter the coordinates of the %s (%d cells): \n", ships[i].getName(),
 					ships[i].getSize());
 			String[] coordinates = scanner.nextLine().toLowerCase(Locale.ROOT).split(" ");
 
 			try {
 				putShipOnTheField(ships[i].getCode(), coordinates[0], coordinates[1]);
 			} catch (IllegalStateException e) {
-				System.out.println(e.getMessage());
+				System.out.println("\n" + e.getMessage());
 				continue;
 			}
 
 			showField();
 			i++;
+		}
+
+		System.out.println("\nThe game starts!");
+		showField();
+		System.out.println("\nTake a shot!");
+
+		while (true) {
+			try {
+				if (makeAShot(scanner.next().toLowerCase(Locale.ROOT))) {
+					showField();
+					System.out.println("You hit a ship!");
+				} else {
+					showField();
+					System.out.println("You missed!");
+				}
+
+				break;
+			} catch (IllegalArgumentException e) {
+				System.out.println("\n" + e.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * Method will take coordinate and determine whether user missed or hit
+	 *
+	 * @param coordinate string with coordinate (a1, g5, ...)
+	 * @return true -> hit, false -> miss
+	 * @throws IllegalArgumentException wrong coordinates
+	 */
+	private boolean makeAShot(String coordinate) throws IllegalArgumentException {
+		if (!checker.checkCoordinates(coordinate, FIELD))
+			throw new IllegalArgumentException("Error! You entered the wrong coordinates!");
+
+		int i = Helper.letterToNumber(coordinate.charAt(0));
+		int j = Integer.parseInt(coordinate.substring(1));
+
+		if ("O".equals(FIELD[i][j])) {
+			FIELD[i][j] = "X";
+
+			return true;
+		} else {
+			FIELD[i][j] = "M";
+			return false;
 		}
 	}
 
