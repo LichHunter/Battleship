@@ -451,6 +451,28 @@ files:
           }
       }
     learner_created: false
+  - name: src/battleship/Ship.java
+    visible: true
+    text: "package battleship;\n\npublic class Ship {\n\tprivate String name;\n\tprivate\
+    \ String code;\n\tprivate int size;\n\n\tpublic Ship(String name, String code,\
+    \ int size) {\n\t\tthis.name = name;\n\t\tthis.code = code;\n\t\tthis.size = size;\n\
+    \t}\n\n\tpublic String getName() {\n\t\treturn name;\n\t}\n\n\tpublic void setName(String\
+    \ name) {\n\t\tthis.name = name;\n\t}\n\n\tpublic int getSize() {\n\t\treturn\
+    \ size;\n\t}\n\n\tpublic void setSize(int size) {\n\t\tthis.size = size;\n\t}\n\
+    \n\tpublic String getCode() {\n\t\treturn code;\n\t}\n\n\tpublic void setCode(String\
+    \ code) {\n\t\tthis.code = code;\n\t}\n\n\t@Override\n\tpublic String toString()\
+    \ {\n\t\treturn \"Ship{\" +\n\t\t\t\t\"name='\" + name + '\\'' +\n\t\t\t\t\",\
+    \ size=\" + size +\n\t\t\t\t'}';\n\t}\n}\n"
+    learner_created: true
+  - name: src/battleship/Checker.java
+    visible: true
+    learner_created: true
+  - name: src/battleship/Helper.java
+    visible: true
+    learner_created: true
+  - name: src/battleship/Game.java
+    visible: true
+    learner_created: true
 feedback_link: https://hyperskill.org/projects/125/stages/664/implement#comment
 status: Unchecked
-record: -1
+record: 2
