@@ -1,7 +1,9 @@
 content:
-  - Employees
-  - Saying animals
-  - Shapes area
-  - Publications
-  - Find mistake
-  - Publication and its subclasses
+- Employees
+- Saying animals
+- Shapes area
+- Publications
+- Find mistake
+- Publication and its subclasses
+- IntBinaryOperation
+- Users and WebSites
