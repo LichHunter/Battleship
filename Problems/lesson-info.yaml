@@ -1,5 +1,5 @@
 content:
-- Employees
+  - Employees
 - Saying animals
 - Shapes area
 - Publications
@@ -7,3 +7,4 @@ content:
 - Publication and its subclasses
 - IntBinaryOperation
 - Users and WebSites
+- Shape hierarchy
