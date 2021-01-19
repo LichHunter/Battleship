@@ -1,8 +1,8 @@
 package battleship;
 
 public class Ship {
-	private final String name;
-	private final String code;
+	private final String name; // official name e.g. Air Carrier
+	private final String code; // coded name e.g. carrier
 	private final int size;
 	private boolean isSank;
 	private String[] shipCoordinates;

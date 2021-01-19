@@ -18,36 +18,26 @@ public class Game {
 		}
 	}
 
-	public void initGame() {
+	/**
+	 * Main method in this class
+	 */
+	public void initAndStartGame() {
 		createField(field);
 		createField(fogOfWar);
 		showField(field);
+		Ship[] ships = createShips();
 
+		game(ships);
+	}
+
+	/**
+	 * Method were game take place
+	 *
+	 * @param ships array that contains all ship objects
+	 */
+	private void game(Ship[] ships) {
 		Scanner scanner = new Scanner(System.in);
-		Ship[] ships = new Ship[]{
-				new Ship("Aircraft Carrier", "carrier", 5),
-				new Ship("Battleship", "battleship", 4),
-				new Ship("Submarine", "submarine", 3),
-				new Ship("Cruiser", "cruiser", 3),
-				new Ship("Destroyer", "destroyer", 2)
-		};
-
-		int i = 0;
-		while (i != 5) {
-			System.out.format("\nEnter the coordinates of the %s (%d cells): \n", ships[i].getName(),
-					ships[i].getSize());
-			String[] coordinates = scanner.nextLine().toLowerCase(Locale.ROOT).split(" ");
-
-			try {
-				putShipOnTheField(ships[i], coordinates[0], coordinates[1]);
-			} catch (IllegalStateException e) {
-				System.out.println("\n" + e.getMessage());
-				continue;
-			}
-
-			showField(field);
-			i++;
-		}
+		fillFieldWithShips(ships, scanner);
 
 		System.out.println("\nThe game starts!");
 		showField(fogOfWar);
@@ -55,7 +45,10 @@ public class Game {
 
 		while (!allShipsSank(field)) {
 			try {
-				if (makeAShot(scanner.next().toLowerCase(Locale.ROOT), field, fogOfWar)) {
+				String shootCoordinates = scanner.next().toLowerCase(Locale.ROOT);
+
+				//if a shot has hit any ship
+				if (makeAShot(shootCoordinates, field, fogOfWar)) {
 					System.out.println();
 					showField(fogOfWar);
 					System.out.println("\nYou hit a ship!");
@@ -77,6 +70,47 @@ public class Game {
 	}
 
 	/**
+	 * Method will interact with user and place ships on field
+	 *
+	 * @param ships   array that contains ship objects
+	 * @param scanner object to get input from user
+	 */
+	private void fillFieldWithShips(Ship[] ships, Scanner scanner) {
+		//for each ship
+		for (Ship ship : ships) {
+			System.out.format("\nEnter the coordinates of the %s (%d cells): \n", ship.getName(),
+					ship.getSize());
+			//user will enter something like "a1 d1", we will split it to two coordinates - a1 beginning, d1 ending
+			String[] coordinates = scanner.nextLine().toLowerCase(Locale.ROOT).split(" ");
+
+			//try to put ship on the field
+			try {
+				putShipOnTheField(ship, coordinates[0], coordinates[1]);
+			} catch (IllegalStateException e) {
+				System.out.println("\n" + e.getMessage());
+				continue;
+			}
+
+			showField(field);
+		}
+	}
+
+	/**
+	 * Create ships
+	 *
+	 * @return array that contains ships
+	 */
+	private Ship[] createShips() {
+		return new Ship[]{
+				new Ship("Aircraft Carrier", "carrier", 5),
+				new Ship("Battleship", "battleship", 4),
+				new Ship("Submarine", "submarine", 3),
+				new Ship("Cruiser", "cruiser", 3),
+				new Ship("Destroyer", "destroyer", 2)
+		};
+	}
+
+	/**
 	 * Method will go through ships and check if any of them were lastly sank
 	 *
 	 * @param ships array that contains ships
@@ -84,11 +118,15 @@ public class Game {
 	 * @return true - ship has been sunk
 	 */
 	private boolean shipIsSank(Ship[] ships, String[][] field) {
+		//for each ship
 		for (Ship ship : ships) {
+			//if ship is not already sank
 			if (!ship.isSank()) {
 				String[] shipCoordinates = ship.getShipCoordinates();
 
+				//check if every cell of ship is "X"
 				for (String shipCoordinate : shipCoordinates) {
+					//if not -> ship is still on the water
 					if ("O".equals(getCell(shipCoordinate, field))) {
 						break;
 					}
@@ -102,8 +140,15 @@ public class Game {
 		return false;
 	}
 
-	private String getCell(String shipCoordinate, String[][] field) {
-		return field[Integer.parseInt(shipCoordinate.substring(0, 0))][Integer.parseInt(shipCoordinate.substring(1))];
+	/**
+	 * Get field cell using ship cell coordinate
+	 *
+	 * @param shipCellCoordinate string which contains coordinate e.g. 11(a1), 21(b1), ...
+	 * @param field              string array that contains game field
+	 * @return cell from field that lies by given coordinate
+	 */
+	private String getCell(String shipCellCoordinate, String[][] field) {
+		return field[Integer.parseInt(shipCellCoordinate.substring(0, 0))][Integer.parseInt(shipCellCoordinate.substring(1))];
 	}
 
 	/**
@@ -227,7 +272,7 @@ public class Game {
 	/**
 	 * Method will fill FIELD array with appropriate date
 	 */
-	private String[][] createField(String[][] field) {
+	private void createField(String[][] field) {
 		//fill first row of FIELD with numbers
 		field[0][0] = " ";
 		for (int i = 1; i < field[0].length; i++) {
@@ -246,7 +291,5 @@ public class Game {
 
 			n++;
 		}
-
-		return field;
 	}
 }
