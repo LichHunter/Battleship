@@ -1,13 +1,12 @@
 package battleship;
 
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Scanner;
 
 public class Game {
 	private final Checker CHECKER;
-	private String[][] field;
-	private String[][] fogOfWar;
+	private final String[][] field;
+	private final String[][] fogOfWar;
 
 	public Game(String[][] field, Checker checker) {
 		this.field = field;
@@ -20,12 +19,11 @@ public class Game {
 	}
 
 	public void initGame() {
-		field = createField(field);
-		fogOfWar = createField(fogOfWar);
+		createField(field);
+		createField(fogOfWar);
 		showField(field);
 
 		Scanner scanner = new Scanner(System.in);
-		//todo make ships array an Enum
 		Ship[] ships = new Ship[]{
 				new Ship("Aircraft Carrier", "carrier", 5),
 				new Ship("Battleship", "battleship", 4),
@@ -41,7 +39,7 @@ public class Game {
 			String[] coordinates = scanner.nextLine().toLowerCase(Locale.ROOT).split(" ");
 
 			try {
-				putShipOnTheField(ships[i].getCode(), coordinates[0], coordinates[1]);
+				putShipOnTheField(ships[i], coordinates[0], coordinates[1]);
 			} catch (IllegalStateException e) {
 				System.out.println("\n" + e.getMessage());
 				continue;
@@ -55,41 +53,93 @@ public class Game {
 		showField(fogOfWar);
 		System.out.println("\nTake a shot!\n");
 
-		while (true) {
+		while (!allShipsSank(field)) {
 			try {
 				if (makeAShot(scanner.next().toLowerCase(Locale.ROOT), field, fogOfWar)) {
 					System.out.println();
 					showField(fogOfWar);
 					System.out.println("\nYou hit a ship!");
+
+					if (shipIsSank(ships, field)) {
+						System.out.println("\nYou sank a ship!");
+					}
 				} else {
 					System.out.println();
 					showField(fogOfWar);
 					System.out.println("\nYou missed!");
 				}
-				showField(field);
-
-				break;
 			} catch (IllegalArgumentException e) {
 				System.out.println("\n" + e.getMessage());
 			}
 		}
+
+		System.out.println("\nYou sank the last ship. You won. Congratulations!");
+	}
+
+	/**
+	 * Method will go through ships and check if any of them were lastly sank
+	 *
+	 * @param ships array that contains ships
+	 * @param field string array that contains game field
+	 * @return true - ship has been sunk
+	 */
+	private boolean shipIsSank(Ship[] ships, String[][] field) {
+		for (Ship ship : ships) {
+			if (!ship.isSank()) {
+				String[] shipCoordinates = ship.getShipCoordinates();
+
+				for (String shipCoordinate : shipCoordinates) {
+					if ("O".equals(getCell(shipCoordinate, field))) {
+						break;
+					}
+				}
+
+				ship.setSank(true);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private String getCell(String shipCoordinate, String[][] field) {
+		return field[Integer.parseInt(shipCoordinate.substring(0, 0))][Integer.parseInt(shipCoordinate.substring(1))];
+	}
+
+	/**
+	 * Method will search field for "O". If "O" found it means that not all ships has been sunk
+	 *
+	 * @param field string array that contains game field
+	 * @return true - all ships sank
+	 */
+	private boolean allShipsSank(String[][] field) {
+		for (String[] row : field) {
+			for (String cell : row) {
+				if ("O".equals(cell)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**
 	 * Method will take coordinate and determine whether user missed or hit
+	 *
 	 * @param coordinate string with coordinate (a1, g5, ...)
 	 * @return true -> hit, false -> miss
 	 * @throws IllegalArgumentException wrong coordinates
 	 */
 	private boolean makeAShot(String coordinate, String[][] field, String[][] fogOfWar)
-			throws IllegalArgumentException{
+			throws IllegalArgumentException {
 		if (!CHECKER.checkCoordinates(coordinate, field))
 			throw new IllegalArgumentException("Error! You entered the wrong coordinates!");
 
 		int i = Helper.letterToNumber(coordinate.charAt(0));
 		int j = Integer.parseInt(coordinate.substring(1));
 
-		if ("O".equals(field[i][j])) {
+		if ("O".equals(field[i][j]) || "X".equals(field[i][j])) {
 			fogOfWar[i][j] = "X";
 			field[i][j] = "X";
 
@@ -110,10 +160,10 @@ public class Game {
 	 * @throws IllegalStateException if coordinates were not correct
 	 *                               or was not able to convert letter from coordinate to number
 	 */
-	private void putShipOnTheField(String ship, String firstCoordinate, String secondCoordinate)
+	private void putShipOnTheField(Ship ship, String firstCoordinate, String secondCoordinate)
 			throws IllegalStateException {
 		//check whether coordinates are correct
-		if (!CHECKER.checkCoordinates(ship, firstCoordinate, secondCoordinate))
+		if (!CHECKER.checkCoordinates(ship.getCode(), firstCoordinate, secondCoordinate))
 			throw new IllegalStateException("Error! Wrong coordinates");
 		//check whether user can place ship in that position
 		if (!CHECKER.checkShipDisplacement(field, firstCoordinate, secondCoordinate))
@@ -121,6 +171,7 @@ public class Game {
 
 		//try to put ship on field
 		try {
+			String[] shipCoordinates;
 			if (firstCoordinate.charAt(0) == secondCoordinate.charAt(0)) {
 				int row = Helper.letterToNumber(firstCoordinate.charAt(0));
 				int beginning = Math.min(Integer.parseInt(firstCoordinate.substring(1)),
@@ -128,9 +179,16 @@ public class Game {
 				int end = Math.max(Integer.parseInt(firstCoordinate.substring(1)),
 						Integer.parseInt(secondCoordinate.substring(1)));
 
+				shipCoordinates = new String[ship.getSize()];
+				int counter = 0;
+
 				for (int i = beginning; i <= end; i++) {
 					field[row][i] = "O";
+					shipCoordinates[counter] = row + "" + i;
+					counter++;
 				}
+
+				ship.setShipCoordinates(shipCoordinates);
 			} else {
 				int column = Integer.parseInt(firstCoordinate.substring(1));
 				int beginning = Math.min(Helper.letterToNumber(firstCoordinate.charAt(0)),
@@ -138,9 +196,16 @@ public class Game {
 				int end = Math.max(Helper.letterToNumber(firstCoordinate.charAt(0)),
 						Helper.letterToNumber(secondCoordinate.charAt(0)));
 
+				shipCoordinates = new String[ship.getSize()];
+				int counter = 0;
+
 				for (int i = beginning; i <= end; i++) {
 					field[i][column] = "O";
+					shipCoordinates[counter] = i + "" + column;
+					counter++;
 				}
+
+				ship.setShipCoordinates(shipCoordinates);
 			}
 		} catch (IllegalArgumentException e) {
 			throw new IllegalStateException(e.getMessage());
